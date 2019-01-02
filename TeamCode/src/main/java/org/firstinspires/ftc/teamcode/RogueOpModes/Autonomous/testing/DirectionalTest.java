@@ -46,7 +46,7 @@ public class DirectionalTest extends LinearOpMode {
             telemetry.clearAll();
             telemetry.addLine("Going FORWARD!");
             telemetry.update();
-            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.METER, AngleUnit.RADIANS), 1.0, DistanceUnit.METER);
+            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.METER, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
             encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.METER, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
             encodedTurn(360, AngleUnit.DEGREES, 0.5 * Math.PI, AngleUnit.RADIANS);
     }
