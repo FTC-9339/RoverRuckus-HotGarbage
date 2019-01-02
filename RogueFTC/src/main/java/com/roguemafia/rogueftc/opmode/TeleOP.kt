@@ -2,40 +2,31 @@ package com.roguemafia.rogueftc.opmode
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.roguemafia.rogueftc.control.Joypad
-import com.roguemafia.rogueftc.control.JoypadCallback
-import com.roguemafia.rogueftc.control.JoypadState
+import com.roguemafia.rogueftc.control.JoypadConfig
 
 abstract class TeleOP : LinearOpMode() {
     protected lateinit var joypad1: Joypad
     protected lateinit var joypad2: Joypad
 
-    override fun runOpMode() {
-        joypad1 = Joypad(gamepad1, object : JoypadCallback {
-            override fun callback(joypadState: JoypadState) {
-                joypad1Callback(joypadState)
-            }
-        })
+    protected var joypad1Config: JoypadConfig = JoypadConfig()
+    protected var joypad2Config: JoypadConfig = JoypadConfig()
 
-        joypad2 = Joypad(gamepad2, object : JoypadCallback {
-            override fun callback(joypadState: JoypadState) {
-                joypad2Callback(joypadState)
-            }
-        })
+    override fun runOpMode() {
+        joypad1 = Joypad(joypad1Config, gamepad1)
+
+        joypad2 = Joypad(joypad2Config, gamepad2)
 
         startup()
         waitForStart()
         while (opModeIsActive()) {
             opModeBehavior()
         }
-        shutdown()    }
+        shutdown()
+    }
 
-    protected open fun startup() {}
+    protected abstract fun startup()
 
-    protected open fun opModeBehavior() {}
+    protected abstract fun opModeBehavior()
 
-    protected open fun shutdown() {}
-
-    protected open fun joypad1Callback(joypadState: JoypadState) {}
-
-    protected open fun joypad2Callback(joypadState: JoypadState) {}
+    protected abstract fun shutdown()
 }
