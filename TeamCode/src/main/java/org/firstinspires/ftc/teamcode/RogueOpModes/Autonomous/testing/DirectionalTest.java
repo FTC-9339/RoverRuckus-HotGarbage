@@ -46,8 +46,8 @@ public class DirectionalTest extends LinearOpMode {
             telemetry.clearAll();
             telemetry.addLine("Going FORWARD!");
             telemetry.update();
-            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.METER, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
-            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.METER, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
+            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
+            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
             encodedTurn(360, AngleUnit.DEGREES, 0.5 * Math.PI, AngleUnit.RADIANS);
     }
 
@@ -111,24 +111,30 @@ public class DirectionalTest extends LinearOpMode {
     }
 
     private void encodedDrive(Velocity robotVelocity, double distance, DistanceUnit distanceUnit) {
-        double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))*(1/DistanceUnit.INCH.toMeters(2.0)) * 0.6;
-        double FRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))*(1/DistanceUnit.INCH.toMeters(2.0)) * 0.6;
-        double BLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))*(1/DistanceUnit.INCH.toMeters(2.0)) * 0.6;
-        double BRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))*(1/DistanceUnit.INCH.toMeters(2.0)) * 0.6;
+        double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
+        double FRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
+        double BLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
+        double BRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
 
         Log.i("FLvelocity", String.valueOf(FLvelocity));
 
         double Xtime = (Double.isInfinite(distanceUnit.toMeters(distance) / robotVelocity.velocityUnit.toMeters(robotVelocity.x))) ? 0.0 : distanceUnit.toMeters(distance) / robotVelocity.velocityUnit.toMeters(robotVelocity.x);
         double Ytime = (Double.isInfinite(distanceUnit.toMeters(distance) / robotVelocity.velocityUnit.toMeters(robotVelocity.y))) ? 0.0 : distanceUnit.toMeters(distance) / robotVelocity.velocityUnit.toMeters(robotVelocity.y);
 
-        double time = (Xtime+Ytime)/2;
+        double time = 0.0;
+
+        if (Xtime != 0.0 && Ytime == 0.0) {
+            time = Xtime;
+        } else if (Ytime != 0.0 && Xtime == 0.0) {
+            time = Ytime;
+        }
 
         Log.i("Time", String.valueOf(time));
 
-        int FLtarget = (int) (DistanceUnit.METER.toInches((FLvelocity * 2.0 * time)) * COUNTS_PER_INCH);
-        int FRtarget = (int) (DistanceUnit.METER.toInches((FRvelocity * 2.0 * time)) * COUNTS_PER_INCH);
-        int BLtarget = (int) (DistanceUnit.METER.toInches((BLvelocity * 2.0 * time)) * COUNTS_PER_INCH);
-        int BRtarget = (int) (DistanceUnit.METER.toInches((BRvelocity * 2.0 * time)) * COUNTS_PER_INCH);
+        int FLtarget = (int) (DistanceUnit.METER.toInches((FLvelocity * time)) * COUNTS_PER_INCH * 2.0);
+        int FRtarget = (int) (DistanceUnit.METER.toInches((FRvelocity * time)) * COUNTS_PER_INCH * 2.0);
+        int BLtarget = (int) (DistanceUnit.METER.toInches((BLvelocity * time)) * COUNTS_PER_INCH * 2.0);
+        int BRtarget = (int) (DistanceUnit.METER.toInches((BRvelocity * time)) * COUNTS_PER_INCH * 2.0);
 
         Log.i("FL Target Position", String.valueOf(FLtarget));
         Log.i("Distance to travel", String.valueOf(FLtarget/COUNTS_PER_INCH * 0.6));
