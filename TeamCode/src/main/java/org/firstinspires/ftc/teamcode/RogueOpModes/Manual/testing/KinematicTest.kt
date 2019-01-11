@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.pow
 
 @TeleOp(name = "Kinematic Test", group = "Testing")
 class KinematicTest(): LinearOpMode() {
@@ -40,12 +42,19 @@ class KinematicTest(): LinearOpMode() {
         waitForStart()
 
         while (opModeIsActive()) {
+
+            gamepad1.apply {
+                left_stick_y = -joystickTransform(left_stick_y)
+                left_stick_x = joystickTransform(left_stick_x)
+                right_stick_x = joystickTransform(right_stick_x)
+            }
+
             wheelVelocities = kinematicModel(-gamepad1.left_stick_y.toDouble(), gamepad1.left_stick_x.toDouble(), gamepad1.right_stick_x.toDouble() * (2 * PI))
 
-            FLMotor.setVelocity(wheelVelocities[0], AngleUnit.RADIANS)
-            FRMotor.setVelocity(wheelVelocities[1], AngleUnit.RADIANS)
-            BLMotor.setVelocity(wheelVelocities[2], AngleUnit.RADIANS)
-            BRMotor.setVelocity(wheelVelocities[3], AngleUnit.RADIANS)
+            FLMotor.setVelocity(wheelVelocities[0] * 0.6, AngleUnit.RADIANS)
+            FRMotor.setVelocity(wheelVelocities[1] * 0.6, AngleUnit.RADIANS)
+            BLMotor.setVelocity(wheelVelocities[2] * 0.6, AngleUnit.RADIANS)
+            BRMotor.setVelocity(wheelVelocities[3] * 0.6, AngleUnit.RADIANS)
 
             telemetry.addData("FLMotor angular velocity:", wheelVelocities[0])
             telemetry.update()
@@ -60,4 +69,7 @@ class KinematicTest(): LinearOpMode() {
 
         return arrayOf(FLVelocity, FRVelocity, BLVelocity, BRVelocity)
     }
+
+    private fun joystickTransform(x: Float) =
+            x.pow(3)/ abs(x)
 }
