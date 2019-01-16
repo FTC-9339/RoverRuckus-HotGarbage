@@ -77,7 +77,7 @@ public class DirectionalTest extends LinearOpMode {
         BR.setPower(power);
     }
 
-    private void encodedTurn(Velocity velocity, double targetAngle, AngleUnit targetUnit) {
+    private void encodedTurn(final Velocity velocity, final double targetAngle, final AngleUnit targetUnit) {
         double yo = ((inWHEEL_SEPERATION_LENGTH+inWHEEL_SEPERATION_WIDTH)/2);
 
         double FLvelocity = ((-yo * velocity.rotationalUnit.toRadians(velocity.z)/2.0) *0.6);
@@ -89,7 +89,7 @@ public class DirectionalTest extends LinearOpMode {
         telemetry.addData("FLvelocity: ", String.valueOf(FLvelocity));
         telemetry.update();
 
-        double time = targetUnit.toRadians(targetAngle) / velocity.rotationalUnit.toRadians(velocity.z);
+        double time = targetUnit.toDegrees(targetAngle) / velocity.rotationalUnit.toDegrees(velocity.z);
 
         if (Double.isInfinite(time)) {
             time = 0.0;
@@ -113,7 +113,6 @@ public class DirectionalTest extends LinearOpMode {
         BL.setVelocity(BLvelocity, AngleUnit.RADIANS);
         BR.setVelocity(BRvelocity, AngleUnit.RADIANS);
         while (opModeIsActive() && FL.isBusy() && FR.isBusy() && BL.isBusy() && BR.isBusy()) {
-            if(!opModeIsActive()) break;
             telemetry.addData("FLMotor current pos: ", FL.getCurrentPosition());
             telemetry.addData("FLMotor Target Position: ", FLtarget);
             telemetry.update();
@@ -122,10 +121,9 @@ public class DirectionalTest extends LinearOpMode {
         FR.setVelocity(0.0);
         BL.setVelocity(0.0);
         BR.setVelocity(0.0);
-        setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private void encodedDrive(Velocity robotVelocity, double distance, DistanceUnit distanceUnit) {
+    private void encodedDrive(final Velocity robotVelocity, final double distance, final DistanceUnit distanceUnit) {
         Velocity velocity = robotVelocity.toUnit(DistanceUnit.METER, AngleUnit.RADIANS);
 
         double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
@@ -169,7 +167,6 @@ public class DirectionalTest extends LinearOpMode {
         BL.setVelocity(BLvelocity, AngleUnit.RADIANS);
         BR.setVelocity(BRvelocity, AngleUnit.RADIANS);
         while (opModeIsActive() && FL.isBusy() && FR.isBusy() && BL.isBusy() && BR.isBusy()) {
-            if(!opModeIsActive()) break;
             telemetry.addData("FLMotor current pos: ", FL.getCurrentPosition());
             telemetry.addData("FLMotor Target Position: ", FLtarget);
             telemetry.update();
