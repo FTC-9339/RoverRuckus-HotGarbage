@@ -4,12 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorImpl;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "Latcher Test: Full Drive", group = "Testing")
@@ -18,17 +16,24 @@ public class LatcherTest extends LinearOpMode {
     DcMotor FL,
             FR,
             BL,
-            BR;
+            BR,
+            Spool;
     DcMotorEx Latcher;
 
     boolean active = false;
     boolean inverse = false;
+
+    ButtonState halfState = ButtonState.NOT_PRESSED;
+    ButtonState inverseState = ButtonState.NOT_PRESSED;
 
     public void runOpMode() {
         FL = hardwareMap.dcMotor.get("FL");
         BL = hardwareMap.dcMotor.get("BL");
         FR = hardwareMap.dcMotor.get("FR");
         BR = hardwareMap.dcMotor.get("BR");
+        Spool = hardwareMap.dcMotor.get("aux2");
+        Spool.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Spool.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Latcher = (DcMotorEx) hardwareMap.dcMotor.get("aux1");
         Latcher.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -47,9 +52,12 @@ public class LatcherTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            if (gamepad1.a) {active = !active;}
+            halfState = halfState.updateState(gamepad1.a);
+            inverseState = inverseState.updateState(gamepad1.b);
 
-            if (gamepad1.b) {inverse = !inverse;}
+            if (halfState == ButtonState.PRESSED) active = !active;
+
+            if (inverseState == ButtonState.PRESSED) inverse = !inverse;
 
             if (gamepad1.y && !Latcher.isMotorEnabled()) { Latcher.setMotorEnable(); }
             else if (gamepad1.y && Latcher.isMotorEnabled()) { Latcher.setMotorDisable(); }
@@ -57,6 +65,14 @@ public class LatcherTest extends LinearOpMode {
             if (gamepad1.dpad_up) {Latcher.setPower(1 * ((active) ? 0.5 : 1.0));}
             else if (gamepad1.dpad_down) {Latcher.setPower(-1 * ((active) ? 0.5 : 1.0));}
             else {Latcher.setPower(0);}
+
+            if (gamepad1.dpad_right) {
+                Spool.setPower(1.0 * (active ? 0.5 : 1.0));
+            } else if (gamepad1.dpad_left) {
+                Spool.setPower(-1.0 * (active ? 0.5 : 1.0));
+            } else {
+                Spool.setPower(0.0);
+            }
 
             FL.setPower(Range.clip((-gamepad1.left_stick_y - gamepad1.left_trigger + gamepad1.right_trigger) * ((active) ? 0.5 : 1.0) * ((inverse) ? -1.0 : 1.0),-1.0,1.0));
             BL.setPower(Range.clip((-gamepad1.left_stick_y + gamepad1.left_trigger - gamepad1.right_trigger) * ((active) ? 0.5 : 1.0) * ((inverse) ? -1.0 : 1.0),-1.0,1.0));
@@ -67,7 +83,29 @@ public class LatcherTest extends LinearOpMode {
             telemetry.addData("Current Motor Velocity: ", ((DcMotorImplEx) FL).getVelocity(AngleUnit.DEGREES));
             telemetry.addData("Latcher encoder value: ", Latcher.getCurrentPosition());
             telemetry.addData("Is Latcher enabled? ", Latcher.isMotorEnabled());
+            telemetry.addData("Spool curent value: ", Spool.getCurrentPosition());
             telemetry.update();
+        }
+    }
+
+    enum ButtonState {
+        NOT_PRESSED,
+        PRESSED,
+        HELD;
+
+        public ButtonState updateState(boolean currentPress) {
+            switch (this) {
+                case NOT_PRESSED:
+                    if (currentPress) return PRESSED;
+                    return this;
+                case PRESSED:
+                    if (currentPress) return HELD;
+                    return this;
+                case HELD:
+                    if (currentPress) return this;
+                    default:
+                        return NOT_PRESSED;
+            }
         }
     }
 

@@ -6,20 +6,24 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.RogueLibrary.vision.managers.TensorflowManager;
 
-@TeleOp(name = "TFOD/Vuforia Testing", group = "Testing")
+@TeleOp(name = "TFOD Testing", group = "Testing")
 public class TFODTesting extends LinearOpMode {
 
     TensorflowManager tfod;
+    TensorflowManager.GOLD_POSITION mineralDetected;
 
     public void runOpMode() {
         tfod = new TensorflowManager(this, true);
-        tfod.getVuforiaManager().initTrackables();
         waitForStart();
         tfod.startDetection();
-        tfod.getVuforiaManager().startTracking();
         while (opModeIsActive()) {
             telemetry.clearAll();
-            switch (tfod.detectAllMinerals()) {
+            mineralDetected = tfod.detectAllMinerals();
+            if (mineralDetected == null) {
+                telemetry.addLine("DON'T WATCH AN ANIME CALLED BOKU");
+                continue;
+            }
+            switch (mineralDetected) {
                 case LEFT:
                     telemetry.addLine("Gold Mineral Position: LEFT");
                     break;
@@ -30,8 +34,8 @@ public class TFODTesting extends LinearOpMode {
                     telemetry.addLine("Gold Mineral Position: CENTER");
                     break;
             }
-            telemetry.addLine(tfod.getVuforiaManager().getRobotLocation().toString());
         }
+        tfod.shutdown();
     }
 
 }

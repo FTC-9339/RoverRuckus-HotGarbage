@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.roguemafia.rogueftc.util.Distance;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RogueLibrary.autonomous.AutonomousUtils;
+import org.firstinspires.ftc.teamcode.RogueLibrary.vision.managers.TensorflowManager;
 
-@Autonomous(name = "Rotational Drive Test", group = "Testing")
-public class DirectionalTest extends LinearOpMode {
+@Autonomous(name = "YOOO TFOD", group = "Testing")
+public class YOOOOTFOD extends LinearOpMode {
 
     // Encoder Details (Andymark NeveRest Classic 40)
     public static final int     amNeverestClassicFourty_COUNTS_PER_REVOLUTION = 1120;
@@ -30,31 +30,49 @@ public class DirectionalTest extends LinearOpMode {
             BL,
             BR;
 
+    TensorflowManager tfod;
+
     public void runOpMode() {
         FL = (DcMotorEx) hardwareMap.dcMotor.get("FL");
         FR = (DcMotorEx) hardwareMap.dcMotor.get("FR");
         BL = (DcMotorEx) hardwareMap.dcMotor.get("BL");
         BR = (DcMotorEx) hardwareMap.dcMotor.get("BR");
 
+        tfod = new TensorflowManager(this, true);
+
         telemetry.addLine("Initialized motors successfully.");
         telemetry.update();
 
-        BL.setDirection(DcMotorSimple.Direction.REVERSE);
-        FL.setDirection(DcMotorSimple.Direction.REVERSE);
+        BR.setDirection(DcMotorSimple.Direction.REVERSE);
+        FR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         telemetry.addLine("Init phase clear.");
         telemetry.update();
+
         waitForStart();
+
+        tfod.startDetection();
+
         telemetry.clearAll();
-        telemetry.addLine("Going FORWARD!");
-        telemetry.update();
-        encodedDrive(new Velocity(6.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
-        encodedDrive(new Velocity(0.0, 6.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
-        encodedTurn(new Velocity(0.0,0.0, 90, DistanceUnit.INCH, AngleUnit.DEGREES), 180, AngleUnit.DEGREES);
-        sleep(500);
-        encodedTurn(new Velocity(0.0,0.0, 90, DistanceUnit.INCH, AngleUnit.DEGREES), 180, AngleUnit.DEGREES);
+
+        sleep(1000);
+
+        if (tfod.goldMineralInView()) {
+            encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.DEGREES), 30, DistanceUnit.INCH);
+        } else {
+            encodedTurn(new Velocity(0.0, 0.0, 45, DistanceUnit.INCH, AngleUnit.DEGREES), -45, AngleUnit.DEGREES);
+            sleep(250);
+            if (tfod.goldMineralInView()) {
+                encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.DEGREES), 24, DistanceUnit.INCH);
+            } else {
+                encodedTurn(new Velocity(0.0, 0.0, 45.0, DistanceUnit.INCH, AngleUnit.DEGREES), 90, AngleUnit.DEGREES);
+                encodedDrive(new Velocity(1.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.DEGREES), 24, DistanceUnit.INCH);
+            }
+        }
+
+        tfod.shutdown();
     }
 
     public void setRunMode(DcMotor.RunMode runMode) {

@@ -22,25 +22,23 @@ public class TensorflowManager {
     private boolean isTfodActive = false;
 
     private int goldMineral_x,
-                silverMineral_1_x,
-                silverMineral_2_x;
+                silverMineral_1_x;
 
     public void startDetection() {
         if (tfod != null) tfod.activate();
         isTfodActive = true;
 
-        goldMineral_x = silverMineral_1_x = silverMineral_2_x = -1;
+        goldMineral_x = silverMineral_1_x = -1;
     }
 
     public TensorflowManager(OpMode opMode, boolean createview) {
         vuforia = new VuforiaManager();
 
         if (!vuforia.isVuforiaInitialized()) {
-            vuforia.initVuforia(opMode.hardwareMap.get(WebcamName.class, "Webcam 1"));
+            vuforia.initVuforia();
         }
 
         if (createview) {
-
             int tfodMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier(
                     "tfodMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
             parameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
@@ -72,38 +70,41 @@ public class TensorflowManager {
         return false;
     }
 
-    public AutonomousUtils.GOLD_POSITION detectAllMinerals() {
+    public GOLD_POSITION detectAllMinerals() {
         if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
-                if (updatedRecognitions.size() == 3) {
+                if (updatedRecognitions.size() == 2) {
                     int goldMineralX = -1;
                     int silverMineral1X = -1;
-                    int silverMineral2X = -1;
                     for (Recognition recognition : updatedRecognitions) {
                         if (recognition.getLabel().equals(AutonomousUtils.LABEL_GOLD_MINERAL)) {
                             goldMineralX = (int) recognition.getLeft();
                         } else if (silverMineral1X == -1) {
                             silverMineral1X = (int) recognition.getLeft();
-                        } else {
-                            silverMineral2X = (int) recognition.getLeft();
                         }
                     }
-                    if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                        if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                            return AutonomousUtils.GOLD_POSITION.LEFT;
-                        } else if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                            return AutonomousUtils.GOLD_POSITION.RIGHT;
+                    if (goldMineralX != -1 && silverMineral1X != -1) {
+                        if (goldMineralX > silverMineral1X) {
+                            return GOLD_POSITION.LEFT;
+                        } else if (goldMineralX < silverMineral1X) {
+                            return GOLD_POSITION.CENTER;
                         } else {
-                            return AutonomousUtils.GOLD_POSITION.CENTER;
+                            return GOLD_POSITION.RIGHT;
                         }
                     }
                 }
             }
         }
         return null;
+    }
+
+    public enum GOLD_POSITION {
+        LEFT,
+        CENTER,
+        RIGHT
     }
 
 }
