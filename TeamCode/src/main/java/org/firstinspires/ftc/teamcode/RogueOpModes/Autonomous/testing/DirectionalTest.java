@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.roguemafia.rogueftc.util.Distance;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.RogueLibrary.autonomous.AutonomousUtils;
 
@@ -23,6 +23,8 @@ public class DirectionalTest extends LinearOpMode {
 
     public static final float   inWHEEL_SEPERATION_WIDTH = 13;
     public static final float   inWHEEL_SEPERATION_LENGTH = 11.5f;
+
+    public static final float   inWHEEL_RADIUS = 1.8f;
 
 
     DcMotorEx FL,
@@ -50,11 +52,11 @@ public class DirectionalTest extends LinearOpMode {
         telemetry.clearAll();
         telemetry.addLine("Going FORWARD!");
         telemetry.update();
-        encodedDrive(new Velocity(6.0, 0.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
-        encodedDrive(new Velocity(0.0, 6.0, 0.0, DistanceUnit.INCH, AngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
-        encodedTurn(new Velocity(0.0,0.0, 90, DistanceUnit.INCH, AngleUnit.DEGREES), 180, AngleUnit.DEGREES);
+        encodedDrive(new Velocity(1.5, 0.0, 0.0, DistanceUnit.METER, UnnormalizedAngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
+        encodedDrive(new Velocity(0.0, 1.5, 0.0, DistanceUnit.METER, UnnormalizedAngleUnit.RADIANS), 12.0, DistanceUnit.INCH);
+        encodedTurn(new Velocity(0.0,0.0, 360, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 180, UnnormalizedAngleUnit.DEGREES);
         sleep(500);
-        encodedTurn(new Velocity(0.0,0.0, 90, DistanceUnit.INCH, AngleUnit.DEGREES), 180, AngleUnit.DEGREES);
+        encodedTurn(new Velocity(0.0,0.0, 90, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 180, UnnormalizedAngleUnit.DEGREES);
     }
 
     public void setRunMode(DcMotor.RunMode runMode) {
@@ -79,13 +81,13 @@ public class DirectionalTest extends LinearOpMode {
         BR.setPower(power);
     }
 
-    private void encodedTurn(final Velocity velocity, final double targetAngle, final AngleUnit targetUnit) {
+    private void encodedTurn(final Velocity velocity, final double targetAngle, final UnnormalizedAngleUnit targetUnit) {
         double yo = ((inWHEEL_SEPERATION_LENGTH+inWHEEL_SEPERATION_WIDTH)/2);
 
-        double FLvelocity = ((-yo * velocity.rotationalUnit.toRadians(velocity.z)/2.0) *0.6);
-        double FRvelocity = ((yo * velocity.rotationalUnit.toRadians(velocity.z)/2.0) *0.6);
-        double BLvelocity = ((-yo * velocity.rotationalUnit.toRadians(velocity.z)/2.0) *0.6);
-        double BRvelocity = ((yo * velocity.rotationalUnit.toRadians(velocity.z)/2.0) *0.6);
+        double FLvelocity = ((-yo * velocity.rotationalUnit.toRadians(velocity.z)/inWHEEL_RADIUS) *0.6);
+        double FRvelocity = ((yo * velocity.rotationalUnit.toRadians(velocity.z)/inWHEEL_RADIUS) *0.6);
+        double BLvelocity = ((-yo * velocity.rotationalUnit.toRadians(velocity.z)/inWHEEL_RADIUS) *0.6);
+        double BRvelocity = ((yo * velocity.rotationalUnit.toRadians(velocity.z)/inWHEEL_RADIUS) *0.6);
 
         Log.i("FLvelocity", String.valueOf(FLvelocity));
         telemetry.addData("FLvelocity: ", String.valueOf(FLvelocity));
@@ -97,10 +99,10 @@ public class DirectionalTest extends LinearOpMode {
             time = 0.0;
         }
 
-        int FLtarget = (int) ((FLvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int FRtarget = (int) ((FRvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int BLtarget = (int) ((BLvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int BRtarget = (int) ((BRvelocity * time) * COUNTS_PER_INCH * 2.0);
+        int FLtarget = (int) ((FLvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int FRtarget = (int) ((FRvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int BLtarget = (int) ((BLvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int BRtarget = (int) ((BRvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
 
         Log.i("FL Target Position", String.valueOf(FLtarget));
         Log.i("Distance to travel", String.valueOf(FLtarget/COUNTS_PER_INCH * 0.6));
@@ -126,12 +128,11 @@ public class DirectionalTest extends LinearOpMode {
     }
 
     private void encodedDrive(final Velocity robotVelocity, final double distance, final DistanceUnit distanceUnit) {
-        Velocity velocity = robotVelocity.toUnit(DistanceUnit.METER, AngleUnit.RADIANS);
 
-        double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
-        double FRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
-        double BLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
-        double BRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(2.0) * 0.6;
+        double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double FRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double BLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double BRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
 
         Log.i("FLvelocity", String.valueOf(FLvelocity));
 
@@ -151,10 +152,10 @@ public class DirectionalTest extends LinearOpMode {
 
         Log.i("Time", String.valueOf(time));
 
-        int FLtarget = (int) ((FLvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int FRtarget = (int) ((FRvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int BLtarget = (int) ((BLvelocity * time) * COUNTS_PER_INCH * 2.0);
-        int BRtarget = (int) ((BRvelocity * time) * COUNTS_PER_INCH * 2.0);
+        int FLtarget = (int) ((FLvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int FRtarget = (int) ((FRvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int BLtarget = (int) ((BLvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
+        int BRtarget = (int) ((BRvelocity * time) * COUNTS_PER_INCH * inWHEEL_RADIUS);
 
         Log.i("FL Target Position", String.valueOf(FLtarget));
         Log.i("Distance to travel", String.valueOf(FLtarget/COUNTS_PER_INCH * 0.6));
@@ -183,9 +184,9 @@ public class DirectionalTest extends LinearOpMode {
     class Velocity {
         public final double x, y, z;
         public final DistanceUnit velocityUnit;
-        public final AngleUnit rotationalUnit;
+        public final UnnormalizedAngleUnit rotationalUnit;
 
-        public Velocity(double x, double y, double z, DistanceUnit velocityUnit, AngleUnit rotationalUnit) {
+        public Velocity(double x, double y, double z, DistanceUnit velocityUnit, UnnormalizedAngleUnit rotationalUnit) {
             this.x = x;
             this.y = y;
             this.z = z;
@@ -193,7 +194,7 @@ public class DirectionalTest extends LinearOpMode {
             this.rotationalUnit = rotationalUnit;
         }
 
-        public Velocity toUnit(DistanceUnit newVelocityUnit, AngleUnit newRotationalUnit) {
+        public Velocity toUnit(DistanceUnit newVelocityUnit, UnnormalizedAngleUnit newRotationalUnit) {
             return new Velocity(
                     newVelocityUnit.fromUnit(velocityUnit, x),
                     newVelocityUnit.fromUnit(velocityUnit, y),

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -20,11 +21,15 @@ public class LatcherTest extends LinearOpMode {
             Spool;
     DcMotorEx Latcher;
 
+    Servo DiscrimiRotator;
+
     boolean active = false;
     boolean inverse = false;
+    boolean rotate = false;
 
     ButtonState halfState = ButtonState.NOT_PRESSED;
     ButtonState inverseState = ButtonState.NOT_PRESSED;
+    ButtonState rotateState = ButtonState.NOT_PRESSED;
 
     public void runOpMode() {
         FL = hardwareMap.dcMotor.get("FL");
@@ -41,6 +46,8 @@ public class LatcherTest extends LinearOpMode {
 
         Latcher.setMotorDisable();
 
+        DiscrimiRotator = hardwareMap.servo.get("sv1");
+
         FL.setDirection(DcMotorSimple.Direction.REVERSE);
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -54,10 +61,13 @@ public class LatcherTest extends LinearOpMode {
 
             halfState = halfState.updateState(gamepad1.a);
             inverseState = inverseState.updateState(gamepad1.b);
+            rotateState = rotateState.updateState(gamepad1.y);
 
             if (halfState == ButtonState.PRESSED) active = !active;
 
             if (inverseState == ButtonState.PRESSED) inverse = !inverse;
+
+            if (rotateState == ButtonState.PRESSED) rotate = !rotate;
 
             if (gamepad1.y && !Latcher.isMotorEnabled()) { Latcher.setMotorEnable(); }
             else if (gamepad1.y && Latcher.isMotorEnabled()) { Latcher.setMotorDisable(); }
@@ -73,6 +83,8 @@ public class LatcherTest extends LinearOpMode {
             } else {
                 Spool.setPower(0.0);
             }
+
+            DiscrimiRotator.setPosition((rotate) ? 1.0 : -0.7);
 
             FL.setPower(Range.clip((-gamepad1.left_stick_y - gamepad1.left_trigger + gamepad1.right_trigger) * ((active) ? 0.5 : 1.0) * ((inverse) ? -1.0 : 1.0),-1.0,1.0));
             BL.setPower(Range.clip((-gamepad1.left_stick_y + gamepad1.left_trigger - gamepad1.right_trigger) * ((active) ? 0.5 : 1.0) * ((inverse) ? -1.0 : 1.0),-1.0,1.0));

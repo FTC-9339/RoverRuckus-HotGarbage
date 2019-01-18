@@ -20,16 +20,21 @@ class KinematicTest(): LinearOpMode() {
 
     private var wheelVelocities: Array<Double> = emptyArray()
 
+    private var inputY = 0.0
+    private var inputX = 0.0
+    private var inputZ = 0.0
+
     override fun runOpMode() {
         val BRMotor: DcMotorEx = hardwareMap.dcMotor.get("BR") as DcMotorEx
         val BLMotor: DcMotorEx = hardwareMap.dcMotor.get("BL") as DcMotorEx
         val FRMotor: DcMotorEx = hardwareMap.dcMotor.get("FR") as DcMotorEx
         val FLMotor: DcMotorEx = hardwareMap.dcMotor.get("FL") as DcMotorEx
 
-        BRMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        /*BRMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         BLMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         FRMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         FLMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        */
 
         BRMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
         BLMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
@@ -43,20 +48,21 @@ class KinematicTest(): LinearOpMode() {
 
         while (opModeIsActive()) {
 
-            gamepad1.apply {
-                left_stick_y = -joystickTransform(left_stick_y)
-                left_stick_x = joystickTransform(left_stick_x)
-                right_stick_x = joystickTransform(right_stick_x)
+            gamepad1.run {
+                inputY = joystickTransform(left_stick_y)
+                inputX = joystickTransform(left_stick_x)
+                inputZ = joystickTransform(right_stick_x)
             }
 
-            wheelVelocities = kinematicModel(-gamepad1.left_stick_y.toDouble(), gamepad1.left_stick_x.toDouble(), gamepad1.right_stick_x.toDouble() * (2 * PI))
+            wheelVelocities = kinematicModel(-inputY, inputX, inputZ * (2 * PI))
 
             FLMotor.setVelocity(wheelVelocities[0] * 0.6, AngleUnit.RADIANS)
             FRMotor.setVelocity(wheelVelocities[1] * 0.6, AngleUnit.RADIANS)
             BLMotor.setVelocity(wheelVelocities[2] * 0.6, AngleUnit.RADIANS)
             BRMotor.setVelocity(wheelVelocities[3] * 0.6, AngleUnit.RADIANS)
 
-            telemetry.addData("FLMotor angular velocity:", wheelVelocities[0])
+            telemetry.addData("FLMotor angular velocity:", FLMotor.velocity)
+            telemetry.addLine(gamepad1.toString())
             telemetry.update()
         }
     }
@@ -70,6 +76,6 @@ class KinematicTest(): LinearOpMode() {
         return arrayOf(FLVelocity, FRVelocity, BLVelocity, BRVelocity)
     }
 
-    private fun joystickTransform(x: Float) =
-            x.pow(3)/ abs(x)
+    private fun joystickTransform(x: Float): Double =
+            (x.pow(3)/ abs(x)).toDouble()
 }
