@@ -11,8 +11,7 @@ public class ExtendLatcher extends LinearOpMode {
         waitForStart();
         DcMotor Latcher = hardwareMap.dcMotor.get("aux1");;
         Latcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Latcher.setDirection(DcMotorSimple.Direction.REVERSE);
-        Latcher.setTargetPosition(-6100);
+        Latcher.setTargetPosition(6300);
         Latcher.setPower(1.0);
         Latcher.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         while (opModeIsActive() && Latcher.isBusy());

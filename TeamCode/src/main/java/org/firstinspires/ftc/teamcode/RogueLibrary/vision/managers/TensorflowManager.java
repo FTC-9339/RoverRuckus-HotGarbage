@@ -80,6 +80,7 @@ public class TensorflowManager {
                     int goldMineralX = -1;
                     int silverMineral1X = -1;
                     for (Recognition recognition : updatedRecognitions) {
+                        recognition.getConfidence();
                         if (recognition.getLabel().equals(AutonomousUtils.LABEL_GOLD_MINERAL)) {
                             goldMineralX = (int) recognition.getLeft();
                         } else if (silverMineral1X == -1) {

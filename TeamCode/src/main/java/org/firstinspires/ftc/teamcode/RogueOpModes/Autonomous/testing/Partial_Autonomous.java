@@ -27,7 +27,7 @@ public class Partial_Autonomous extends LinearOpMode {
     // Gear Ratio
     public static final double GEAR_RATIO = (double) WHEEL_GEAR / DRIVE_GEAR;
 
-    static final int latcherTgtPos = -6100;
+    static final int latcherTgtPos = -6850;
 
 
     static final double pow = 0.5;
@@ -55,9 +55,6 @@ public class Partial_Autonomous extends LinearOpMode {
 
         setRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        Flipper = hardwareMap.servo.get("flip");
-        Flipper.setPosition(0.5);
-
         telemetry.addLine("Ready!");
         waitForStart();
 
@@ -67,14 +64,14 @@ public class Partial_Autonomous extends LinearOpMode {
             Latcher.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             Latcher.setPower(1);
 
-            while (Latcher.isBusy() && !isStopRequested()) ;
+            while (Latcher.isBusy() && opModeIsActive()) ;
 
             Latcher.setPower(0);
             Latcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-            encodedDrive(AutonomousUtils.DRIVE_DIRECTION.STRAFE_RIGHT, 24.0, DistanceUnit.INCH, pow);
+            encodedDrive(AutonomousUtils.DRIVE_DIRECTION.STRAFE_LEFT, 24.0, DistanceUnit.INCH, pow);
             idle();
-            encodedDrive(AutonomousUtils.DRIVE_DIRECTION.FORWARD, 36.0, DistanceUnit.INCH, pow);
+            encodedDrive(AutonomousUtils.DRIVE_DIRECTION.FORWARD, 56.0, DistanceUnit.INCH, pow);
             idle();
 
             break;

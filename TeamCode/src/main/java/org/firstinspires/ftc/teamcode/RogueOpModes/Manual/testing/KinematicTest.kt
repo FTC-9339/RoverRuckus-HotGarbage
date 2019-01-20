@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.RogueOpModes.Manual.testing
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -11,6 +12,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
 
+@Disabled
 @TeleOp(name = "Kinematic Test", group = "Testing")
 class KinematicTest(): LinearOpMode() {
 

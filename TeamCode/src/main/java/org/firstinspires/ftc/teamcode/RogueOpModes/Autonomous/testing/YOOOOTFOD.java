@@ -29,7 +29,7 @@ public class YOOOOTFOD extends LinearOpMode {
     public static final float   inWHEEL_SEPERATION_WIDTH = 13;
     public static final float   inWHEEL_SEPERATION_LENGTH = 11.5f;
 
-    public static final float   inWHEEL_RADIUS = 1.8f;
+    public static final float   inWHEEL_RADIUS = 2.0f;
 
     DcMotorEx FL,
             FR,
@@ -38,8 +38,8 @@ public class YOOOOTFOD extends LinearOpMode {
 
     TensorflowManager tfod;
 
-    BNO055IMU imu;
-    PIDController pidRotate = new PIDController(0.05, 0.0, 0.0);
+    //BNO055IMU imu;
+    //PIDController pidRotate = new PIDController(0.05, 0.0, 0.0);
 
     Orientation             lastAngles = new Orientation();
     double                  globalAngle;
@@ -50,6 +50,7 @@ public class YOOOOTFOD extends LinearOpMode {
         BL = (DcMotorEx) hardwareMap.dcMotor.get("BL");
         BR = (DcMotorEx) hardwareMap.dcMotor.get("BR");
 
+        /*
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
         parameters.mode                = BNO055IMU.SensorMode.IMU;
@@ -59,7 +60,7 @@ public class YOOOOTFOD extends LinearOpMode {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-
+        */
         tfod = new TensorflowManager(this, true);
 
         telemetry.addLine("Initialized motors successfully.");
@@ -72,7 +73,7 @@ public class YOOOOTFOD extends LinearOpMode {
 
         telemetry.addLine("Init phase clear.");
         telemetry.update();
-
+        /*
         telemetry.addLine("CALIBRATING GYRO");
         telemetry.update();
 
@@ -84,36 +85,38 @@ public class YOOOOTFOD extends LinearOpMode {
 
         telemetry.addLine("CALIBRATED");
         telemetry.update();
-
+        */
         waitForStart();
 
         tfod.startDetection();
 
         telemetry.clearAll();
 
-        sleep(1000);
+        sleep(1500);
 
         if (tfod.goldMineralInView()) {
-            encodedDrive(new Velocity(12.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 30, DistanceUnit.INCH);
+            encodedDrive(new Velocity(6.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 12, DistanceUnit.INCH);
         } else {
             //rotate(-45, 0.5);
-            encodedTurn(new Velocity(0.0,0.0,90.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), -45, UnnormalizedAngleUnit.DEGREES);
-            sleep(250);
+            encodedTurn(new Velocity(0.0,0.0,45.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), -45, UnnormalizedAngleUnit.DEGREES);
+            sleep(500);
             if (tfod.goldMineralInView()) {
-                encodedDrive(new Velocity(12.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 24, DistanceUnit.INCH);
+                encodedDrive(new Velocity(6.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 12, DistanceUnit.INCH);
             } else {
                 //rotate(90, 0.5);
-                encodedTurn(new Velocity(0.0,0.0,90.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 90, UnnormalizedAngleUnit.DEGREES);
-                encodedDrive(new Velocity(12.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 24, DistanceUnit.INCH);
+                encodedTurn(new Velocity(0.0,0.0,45.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 90, UnnormalizedAngleUnit.DEGREES);
+                encodedDrive(new Velocity(6.0, 0.0, 0.0, DistanceUnit.INCH, UnnormalizedAngleUnit.DEGREES), 12, DistanceUnit.INCH);
             }
         }
 
         tfod.shutdown();
     }
 
+    /*
     /**
      * Resets the cumulative angle tracking to zero.
      */
+    /*
     private void resetAngle()
     {
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -125,6 +128,7 @@ public class YOOOOTFOD extends LinearOpMode {
      * Get current cumulative angle rotation from last reset.
      * @return Angle in degrees. + = left, - = right from zero point.
      */
+    /*
     private double getAngle()
     {
         // We experimentally determined the Z axis is the axis we want to use for heading angle.
@@ -152,6 +156,7 @@ public class YOOOOTFOD extends LinearOpMode {
      * Rotate left or right the number of degrees. Does not support turning more than 180 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
+    /*
     private void rotate(int degrees, double power)
     {
         // restart imu angle tracking.
@@ -219,7 +224,7 @@ public class YOOOOTFOD extends LinearOpMode {
         // reset angle tracking on new heading.
         resetAngle();
     }
-
+    */
     public void setRunMode(DcMotor.RunMode runMode) {
         FR.setMode(runMode);
         FL.setMode(runMode);
@@ -294,10 +299,10 @@ public class YOOOOTFOD extends LinearOpMode {
 
     private void encodedDrive(final Velocity robotVelocity, final double distance, final DistanceUnit distanceUnit) {
 
-        double FLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
-        double FRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
-        double BLvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
-        double BRvelocity = (robotVelocity.velocityUnit.toMeters(robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double FLvelocity = (robotVelocity.velocityUnit.toMeters(-robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double FRvelocity = (robotVelocity.velocityUnit.toMeters(-robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double BLvelocity = (robotVelocity.velocityUnit.toMeters(-robotVelocity.x) + robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
+        double BRvelocity = (robotVelocity.velocityUnit.toMeters(-robotVelocity.x) - robotVelocity.velocityUnit.toMeters(robotVelocity.y))/DistanceUnit.INCH.toMeters(inWHEEL_RADIUS) * 0.6;
 
         Log.i("FLvelocity", String.valueOf(FLvelocity));
 
